@@ -1,0 +1,278 @@
+import mysql.connector
+from datetime import date
+import pandas as pd
+
+
+
+
+def commit_live_articles(key_id, title, title_A, title_B, title_C, body, create_date, updated_date):
+    db = mysql.connector.connect(
+        host='20.163.58.138',
+        user='dvp',
+        port='3306',
+        password='Zzb33k23432@#$#@',
+        database='test')
+
+    c = db.cursor()
+
+    #commit to db
+    params = (key_id, title, title_A, title_B, title_C, body, create_date, updated_date)
+    insert_query = "INSERT INTO live_articles (key_id, title, title_A, title_B, title_C, body, create_date, update_date) VALUES (%s, %s, %s, %s, %s, %s, %s, %s);"
+    c.execute(insert_query, params)
+
+    db.commit()
+    c.close()
+    db.close()
+
+def replace_live_articles(key_id,title, title_A, title_B, title_C, body, create_date, updated_date):
+    db = mysql.connector.connect(
+        host='20.163.58.138',
+        user='dvp',
+        port='3306',
+        password='Zzb33k23432@#$#@',
+        database='test')
+
+    c = db.cursor()
+
+
+    # delete old entry
+    del_query = "DELETE FROM live_articles  WHERE live_articles.key_id = %(param_value)s;"
+
+    query_params = {'param_value': key_id}
+
+    c.execute(del_query, query_params)
+
+    # commit to db
+    params = (key_id, title, title_A, title_B, title_C, body, create_date, updated_date)
+    insert_query = "INSERT INTO live_articles (key_id, title, title_A, title_B, title_C, body, create_date, update_date) VALUES (%s, %s, %s, %s, %s, %s, %s, %s);"
+
+    c.execute(insert_query, params)
+    db.commit()
+    c.close()
+    db.close()
+
+
+def commit_old_articles(key_id, title, title_A, title_B, title_C, body, create_date):
+    db = mysql.connector.connect(
+        host='20.163.58.138',
+        user='dvp',
+        port='3306',
+        password='Zzb33k23432@#$#@',
+        database='test')
+
+    c = db.cursor()
+    params = (key_id, title, title_A, title_B, title_C, body, create_date)
+    insert_query = "INSERT INTO old_articles (key_id, title, title_A, title_B, title_C, body, create_date) VALUES (%s, %s, %s, %s, %s, %s, %s);"
+
+    c.execute(insert_query, params)
+    db.commit()
+    c.close()
+    db.close()
+
+def commit_rankings(key_id, main_rank, date):
+    db = mysql.connector.connect(
+        host='20.163.58.138',
+        user='dvp',
+        port='3306',
+        password='Zzb33k23432@#$#@',
+        database='test')
+
+    c = db.cursor()
+    params = (key_id, main_rank, date)
+    insert_query = "INSERT INTO live_rankings (key_id, main_rank, date) VALUES (%s, %s, %s);"
+
+    c.execute(insert_query, params)
+    db.commit()
+    c.close()
+    db.close()
+
+def commit_cat(key_id, cat, date):
+    db = mysql.connector.connect(
+        host='20.163.58.138',
+        user='dvp',
+        port='3306',
+        password='Zzb33k23432@#$#@',
+        database='test')
+
+    c = db.cursor()
+    params = (key_id, cat, date)
+    insert_query = "INSERT INTO live_cat (key_id, cat, date) VALUES (%s, %s, %s);"
+
+    c.execute(insert_query, params)
+    db.commit()
+    c.close()
+    db.close()
+
+
+def commit_img( key_id, img, date):
+    db = mysql.connector.connect(
+        host='20.163.58.138',
+        user='dvp',
+        port='3306',
+        password='Zzb33k23432@#$#@',
+        database='test')
+
+    c = db.cursor()
+    params = (key_id, img, date)
+    insert_query = "INSERT INTO live_img (key_id, cat, date) VALUES (%s, %s, %s);"
+
+    c.execute(insert_query, params)
+    db.commit()
+    c.close()
+    db.close()
+
+def commit_urls( key_id, url, date):
+    db = mysql.connector.connect(
+        host='20.163.58.138',
+        user='dvp',
+        port='3306',
+        password='Zzb33k23432@#$#@',
+        database='test')
+
+    c = db.cursor()
+    params = (key_id, url, date)
+    insert_query = "INSERT INTO live_urls (key_id, cat, date) VALUES (%s, %s, %s);"
+
+    c.execute(insert_query, params)
+    db.commit()
+    c.close()
+    db.close()
+
+def all_it_from_ns(item, table):
+    db = mysql.connector.connect(
+        host='20.163.58.138',
+        user='dvp',
+        port='3306',
+        password='Zzb33k23432@#$#@',
+        database='test')
+
+    df = pd.read_sql_query(f"SELECT * FROM {table}", db)
+    db.close()
+
+    return df[item].tolist()
+
+
+def rank_from_desc(desc):
+    db = mysql.connector.connect(
+        host='20.163.58.138',
+        user='dvp',
+        port='3306',
+        password='Zzb33k23432@#$#@',
+        database='test')
+    req_query = """
+    SELECT main_rank 
+    FROM live_rankings 
+    LEFT JOIN live_articles ON live_articles.key_id = live_rankings.key_id
+    WHERE live_articles.body = %(param_value)s;
+    """
+
+    query_params = {'param_value': desc}
+    df = pd.read_sql_query(req_query, db, params=query_params)
+    db.close()
+
+    return df['main_rank'][0]
+
+def key_id_from_desc(desc):
+    db = mysql.connector.connect(
+        host='20.163.58.138',
+        user='dvp',
+        port='3306',
+        password='Zzb33k23432@#$#@',
+        database='test')
+    req_query = """
+    SELECT key_id
+    FROM live_articles 
+    WHERE live_articles.body = %(param_value)s;
+    """
+
+    query_params = {'param_value': desc}
+    df = pd.read_sql_query(req_query, db, params=query_params)
+    db.close()
+
+    return df['key_id'][0]
+
+def articles_from_key(key):
+    db = mysql.connector.connect(
+        host='20.163.58.138',
+        user='dvp',
+        port='3306',
+        password='Zzb33k23432@#$#@',
+        database='test')
+    req_query = """
+    SELECT *
+    FROM live_articles 
+    WHERE live_articles.key_id = %(param_value)s;
+    """
+
+    query_params = {'param_value': key}
+    df = pd.read_sql_query(req_query, db, params=query_params)
+    db.close()
+
+    return df
+
+
+
+def commit_error(err, date):
+    db = mysql.connector.connect(
+        host='20.163.58.138',
+        user='dvp',
+        port='3306',
+        password='Zzb33k23432@#$#@',
+        database='test')
+
+    c = db.cursor()
+    params = (err, date)
+    insert_query = "INSERT INTO parse_error (error, date) VALUES (%s, %s);"
+
+    c.execute(insert_query, params)
+    db.commit()
+    c.close()
+    db.close()
+
+
+'''
+
+
+
+# Procedure for creating databases
+
+
+db = mysql.connector.connect(
+        host='20.163.58.138',
+        user='dvp',
+        port='3306',
+        password='Zzb33k23432@#$#@',
+        database='test')
+
+c = db.cursor()
+
+c.execute("""CREATE TABLE tble_name (
+            key_id varchar(225),
+            headline varchar(225),
+            gist1 LONGTEXT,
+            gist2 LONGTEXT,
+            gist3 LONGTEXT,
+            article LONGTEXT,
+            cat varchar(225),
+            img LONGTEXT,
+            date datetime);""")
+
+c.close()
+
+
+df_art,df_ranks = pd.read_csv('/Users/ethanjones/Downloads/articles_intro.csv'), pd.read_csv('/Users/ethanjones/Downloads/ranks_intro.csv')
+
+df_ranks['date'] = df_art['date']
+
+
+for i,r in df_ranks.iterrows():
+    commit_rankings(r['key'],r['rank'],r['subrank'],r['rank'],r['date'])
+
+#key_id, headline, gist1, gist2, gist3, article, cat, img, date
+for i,r in df_art.iterrows():
+    commit_articles(r['key'],r['headline'],r['gist'],'gist2','gist3',r['article'],'cat','img',r['date'])
+
+
+'''
+
+
