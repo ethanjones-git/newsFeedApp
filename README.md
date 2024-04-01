@@ -1,4 +1,4 @@
-The main.py file is designed to run all other functions.
+The main.py file is designed to run all functions.
 
 Need:
   - edit key.py: news api key, chat gpt api key
